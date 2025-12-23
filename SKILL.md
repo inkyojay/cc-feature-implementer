@@ -1,477 +1,317 @@
 ---
-name: feature-implementer
-description: Executes feature implementation phase-by-phase based on existing plan documents. Updates progress, runs quality checks, tracks changes, and provides risk assessments. Use when implementing planned features, executing development phases, building according to plans, or coding from structured roadmaps. Keywords: implement, execute, build, code, develop, start implementation, continue implementation, phase execution.
+name: feature-planner
+description: Creates phase-based feature plans with quality gates and incremental delivery structure. Use when planning features, organizing work, breaking down tasks, creating roadmaps, or structuring development strategy. Keywords: plan, planning, phases, breakdown, strategy, roadmap, organize, structure, outline.
 ---
 
-# Feature Implementer
+# Feature Planner
 
 ## Purpose
-Execute feature implementation following structured plans with:
-- Phase-by-phase execution with user approval between phases
-- Real-time checkbox updates in plan document
-- Quality gate validation after each phase
-- Change tracking and risk assessment
-- Git integration with automatic commits
-- Dry-run mode for preview
-- Destructive operation warnings
+Generate structured, phase-based plans where:
+- Each phase delivers complete, runnable functionality
+- Quality gates enforce validation before proceeding
+- User approves plan before any work begins
+- Progress tracked via markdown checkboxes
+- Each phase is 1-4 hours maximum
 
-## Execution Workflow
+## Planning Workflow
 
-### Step 1: Plan Discovery and Loading
-1. Ask user for plan document path or search `docs/plans/` directory
-2. Read plan document and parse structure
-3. Identify current phase (first unchecked phase)
-4. Display plan overview and current progress
-5. Confirm with user before starting
+### Step 1: Requirements Analysis
+1. Read relevant files to understand codebase architecture
+2. Identify dependencies and integration points
+3. Assess complexity and risks
+4. Determine appropriate scope (small/medium/large)
 
-### Step 2: Dry-Run Mode (Optional)
-Before making actual changes, offer dry-run mode:
-- "Run in dry-run mode first to preview changes? (Y/n)"
-- If yes: Analyze what would change without modifying files
-- Show preview of files to be created/modified/deleted
-- Display risk assessment
-- After preview, ask: "Proceed with actual implementation? (Y/n)"
+### Step 2: Phase Breakdown with TDD Integration
+Break feature into 3-7 phases where each phase:
+- **Test-First**: Write tests BEFORE implementation
+- Delivers working, testable functionality
+- Takes 1-4 hours maximum
+- Follows Red-Green-Refactor cycle
+- Has measurable test coverage requirements
+- Can be rolled back independently
+- Has clear success criteria
 
-### Step 3: Phase Execution Loop
-For each phase:
+**Phase Structure**:
+- Phase Name: Clear deliverable
+- Goal: What working functionality this produces
+- **Test Strategy**: What test types, coverage target, test scenarios
+- Tasks (ordered by TDD workflow):
+  1. **RED Tasks**: Write failing tests first
+  2. **GREEN Tasks**: Implement minimal code to make tests pass
+  3. **REFACTOR Tasks**: Improve code quality while tests stay green
+- Quality Gate: TDD compliance + validation criteria
+- Dependencies: What must exist before starting
+- **Coverage Target**: Specific percentage or checklist for this phase
 
-**A. Pre-Phase Check**
-- Display phase name, goal, and tasks
-- Analyze risk level based on operations:
-  - 🟢 Low: New files, additive code, documentation
-  - 🟡 Medium: Modifying existing code, configuration changes
-  - 🟠 High: Database migrations, API changes, dependency updates
-  - 🔴 Critical: File deletions, breaking changes, security modifications
-- If High/Critical risk: Require explicit confirmation
-- Ask: "Ready to start Phase N: [Name]? (Y/n)"
+### Step 3: Plan Document Creation
+Use plan-template.md to generate: `docs/plans/PLAN_<feature-name>.md`
 
-**B. Task Execution**
-For each task in phase:
-1. Execute the implementation
-2. Track files created/modified/deleted
-3. Mark checkbox [x] in plan document immediately
-4. Update task status in real-time
+Include:
+- Overview and objectives
+- Architecture decisions with rationale
+- Complete phase breakdown with checkboxes
+- Quality gate checklists
+- Risk assessment table
+- Rollback strategy per phase
+- Progress tracking section
+- Notes & learnings area
 
-**C. Destructive Operation Handling**
-Before any destructive operation:
-- File deletion: "⚠️ About to DELETE [file]. This is IRREVERSIBLE. Confirm? (Y/n)"
-- Breaking changes: "⚠️ This change BREAKS existing API. Confirm? (Y/n)"
-- Database drops: "🔴 CRITICAL: About to drop table/data. Confirm? (Y/n)"
-- Require explicit "Y" confirmation, default to abort
+### Step 4: User Approval
+**CRITICAL**: Use AskUserQuestion to get explicit approval before proceeding.
 
-**D. Phase Completion**
-1. Update phase status: ⏳ Pending → 🔄 In Progress → ✅ Complete
-2. Update "Last Updated" date in plan
-3. Record actual time spent
-4. Add notes to plan document if any deviations occurred
+Ask:
+- "Does this phase breakdown make sense for your project?"
+- "Any concerns about the proposed approach?"
+- "Should I proceed with creating the plan document?"
 
-### Step 4: Quality Gate Validation
-After phase completion:
+Only create plan document after user confirms approval.
 
-**A. Extract Validation Commands**
-- Read validation commands from plan's Quality Gate section
-- If not specified, use project-detected defaults
+### Step 5: Document Generation
+1. Create `docs/plans/` directory if not exists
+2. Generate plan document with all checkboxes unchecked
+3. Add clear instructions in header about quality gates
+4. Inform user of plan location and next steps
 
-**B. Run All Checks**
-Execute each validation command:
+## Quality Gate Standards
+
+Each phase MUST validate these items before proceeding to next phase:
+
+**Build & Compilation**:
+- [ ] Project builds/compiles without errors
+- [ ] No syntax errors
+
+**Test-Driven Development (TDD)**:
+- [ ] Tests written BEFORE production code
+- [ ] Red-Green-Refactor cycle followed
+- [ ] Unit tests: ≥80% coverage for business logic
+- [ ] Integration tests: Critical user flows validated
+- [ ] Test suite runs in acceptable time (<5 minutes)
+
+**Testing**:
+- [ ] All existing tests pass
+- [ ] New tests added for new functionality
+- [ ] Test coverage maintained or improved
+
+**Code Quality**:
+- [ ] Linting passes with no errors
+- [ ] Type checking passes (if applicable)
+- [ ] Code formatting consistent
+
+**Functionality**:
+- [ ] Manual testing confirms feature works
+- [ ] No regressions in existing functionality
+- [ ] Edge cases tested
+
+**Security & Performance**:
+- [ ] No new security vulnerabilities
+- [ ] No performance degradation
+- [ ] Resource usage acceptable
+
+**Documentation**:
+- [ ] Code comments updated
+- [ ] Documentation reflects changes
+
+## Progress Tracking Protocol
+
+Add this to plan document header:
+
+```markdown
+**CRITICAL INSTRUCTIONS**: After completing each phase:
+1. ✅ Check off completed task checkboxes
+2. 🧪 Run all quality gate validation commands
+3. ⚠️ Verify ALL quality gate items pass
+4. 📅 Update "Last Updated" date
+5. 📝 Document learnings in Notes section
+6. ➡️ Only then proceed to next phase
+
+⛔ DO NOT skip quality gates or proceed with failing checks
+```
+
+## Phase Sizing Guidelines
+
+**Small Scope** (2-3 phases, 3-6 hours total):
+- Single component or simple feature
+- Minimal dependencies
+- Clear requirements
+- Example: Add dark mode toggle, create new form component
+
+**Medium Scope** (4-5 phases, 8-15 hours total):
+- Multiple components or moderate feature
+- Some integration complexity
+- Database changes or API work
+- Example: User authentication system, search functionality
+
+**Large Scope** (6-7 phases, 15-25 hours total):
+- Complex feature spanning multiple areas
+- Significant architectural impact
+- Multiple integrations
+- Example: AI-powered search with embeddings, real-time collaboration
+
+## Risk Assessment
+
+Identify and document:
+- **Technical Risks**: API changes, performance issues, data migration
+- **Dependency Risks**: External library updates, third-party service availability
+- **Timeline Risks**: Complexity unknowns, blocking dependencies
+- **Quality Risks**: Test coverage gaps, regression potential
+
+For each risk, specify:
+- Probability: Low/Medium/High
+- Impact: Low/Medium/High
+- Mitigation Strategy: Specific action steps
+
+## Rollback Strategy
+
+For each phase, document how to revert changes if issues arise.
+Consider:
+- What code changes need to be undone
+- Database migrations to reverse (if applicable)
+- Configuration changes to restore
+- Dependencies to remove
+
+## Test Specification Guidelines
+
+### Test-First Development Workflow
+
+**For Each Feature Component**:
+1. **Specify Test Cases** (before writing ANY code)
+   - What inputs will be tested?
+   - What outputs are expected?
+   - What edge cases must be handled?
+   - What error conditions should be tested?
+
+2. **Write Tests** (Red Phase)
+   - Write tests that WILL fail
+   - Verify tests fail for the right reason
+   - Run tests to confirm failure
+   - Commit failing tests to track TDD compliance
+
+3. **Implement Code** (Green Phase)
+   - Write minimal code to make tests pass
+   - Run tests frequently (every 2-5 minutes)
+   - Stop when all tests pass
+   - No additional functionality beyond tests
+
+4. **Refactor** (Blue Phase)
+   - Improve code quality while tests remain green
+   - Extract duplicated logic
+   - Improve naming and structure
+   - Run tests after each refactoring step
+   - Commit when refactoring complete
+
+### Test Types
+
+**Unit Tests**:
+- **Target**: Individual functions, methods, classes
+- **Dependencies**: None or mocked/stubbed
+- **Speed**: Fast (<100ms per test)
+- **Isolation**: Complete isolation from external systems
+- **Coverage**: ≥80% of business logic
+
+**Integration Tests**:
+- **Target**: Interaction between components/modules
+- **Dependencies**: May use real dependencies
+- **Speed**: Moderate (<1s per test)
+- **Isolation**: Tests component boundaries
+- **Coverage**: Critical integration points
+
+**End-to-End (E2E) Tests**:
+- **Target**: Complete user workflows
+- **Dependencies**: Real or near-real environment
+- **Speed**: Slow (seconds to minutes)
+- **Isolation**: Full system integration
+- **Coverage**: Critical user journeys
+
+### Test Coverage Calculation
+
+**Coverage Thresholds** (adjust for your project):
+- **Business Logic**: ≥90% (critical code paths)
+- **Data Access Layer**: ≥80% (repositories, DAOs)
+- **API/Controller Layer**: ≥70% (endpoints)
+- **UI/Presentation**: Integration tests preferred over coverage
+
+**Coverage Commands by Ecosystem**:
 ```bash
-flutter test
-flutter analyze
-dart format --set-exit-if-changed .
+# JavaScript/TypeScript
+jest --coverage
+nyc report --reporter=html
+
+# Python
+pytest --cov=src --cov-report=html
+coverage report
+
+# Java
+mvn jacoco:report
+gradle jacocoTestReport
+
+# Go
+go test -cover ./...
+go tool cover -html=coverage.out
+
+# .NET
+dotnet test /p:CollectCoverage=true /p:CoverageReporter=html
+reportgenerator -reports:coverage.xml -targetdir:coverage
+
+# Ruby
+bundle exec rspec --coverage
+open coverage/index.html
+
+# PHP
+phpunit --coverage-html coverage
 ```
 
-**C. Track Results**
-- ✅ Command passed
-- ❌ Command failed (capture error output)
+### Common Test Patterns
 
-**D. Failure Handling**
-If quality gate fails:
-- **Attempt 1**: Show errors, ask "Fix and retry? (Y/n)"
-- **Attempt 2**: Show errors, ask "Retry? (Y/n)"
-- **Attempt 3**: Show errors, analyze potential problems, ask user
+**Arrange-Act-Assert (AAA) Pattern**:
+```
+test 'description of behavior':
+  // Arrange: Set up test data and dependencies
+  input = createTestData()
 
-On 3rd failure, provide problem analysis:
-```markdown
-## Quality Gate Failed After 3 Attempts
+  // Act: Execute the behavior being tested
+  result = systemUnderTest.method(input)
 
-### Failed Checks
-- ❌ `flutter analyze` - 5 errors in lib/data/models/
-
-### Potential Problems Identified
-1. Type mismatch in DateModel.fromJson() - expecting String but got int
-2. Missing null safety operators in 3 locations
-3. Import statement references non-existent file
-
-### Suggested Actions
-- Review error output above for specific line numbers
-- Check if plan tasks were incomplete or misunderstood
-- Consider reverting this phase and revising approach
-
-### Options
-- Continue anyway (skip quality gate) - NOT RECOMMENDED
-- Pause implementation to debug
-- Abort and restore to previous phase
-- Get help/clarification
-
-Continue despite failures? (Y/n)
+  // Assert: Verify expected outcome
+  assert result == expectedOutput
 ```
 
-**E. Success Path**
-If all checks pass:
-- Mark all quality gate items [x] in plan
-- Proceed to change summary
+**Given-When-Then (BDD Style)**:
+```
+test 'feature should behave in specific way':
+  // Given: Initial context/state
+  given userIsLoggedIn()
 
-### Step 5: Change Summary & Risk Briefing
-Use change-summary-template.md to generate:
+  // When: Action occurs
+  when userClicksButton()
 
-```markdown
-## Phase N Complete: [Phase Name]
-
-### Files Changed (X files)
-**Created** (Y files):
-- ✅ `lib/domain/entities/partner.dart` (🟢 Low risk - new entity)
-- ✅ `lib/data/models/date_model.dart` (🟢 Low risk - new model)
-
-**Modified** (Z files):
-- ✅ `lib/injection.dart` (🟡 Medium risk - added 3 new dependencies)
-- ✅ `lib/core/database/app_database.dart` (🟠 High risk - schema changes)
-
-**Deleted** (0 files):
-- None
-
-### Changes Summary
-- Added 3 new entity classes (Partner, Date, Note)
-- Added 3 corresponding Drift models with JSON serialization
-- Updated dependency injection to register new repositories
-- **⚠️ Database schema change**: Added 3 new tables via Drift migration
-
-### Risk Assessment
-**Overall Risk**: 🟠 High
-
-**Destructive Changes**: None
-
-**Potentially Harmful Changes**:
-- Database migration (lib/core/database/app_database.dart)
-  - Risk: Existing app data may need migration
-  - Impact: App may crash if migration fails on user devices
-  - Mitigation: Test migration with existing data before release
-
-**Dependencies Added**:
-- None
-
-**Breaking Changes**: None
-
-### Quality Gate Results
-✅ Build successful (flutter build --debug)
-✅ All tests pass (18 passed, 0 failed)
-✅ Analysis clean (flutter analyze - 0 issues)
-✅ Formatting consistent (dart format)
-
-### Git Status
-Branch: feature/semantic-search
-Uncommitted changes: 5 files
+  // Then: Observable outcome
+  then shouldSeeConfirmation()
 ```
 
-### Step 6: Git Integration
-After successful quality gate and change summary:
+**Mocking/Stubbing Dependencies**:
+```
+test 'component should call dependency':
+  // Create mock/stub
+  mockService = createMock(ExternalService)
+  component = new Component(mockService)
 
-**A. Stage Changes**
-```bash
-git add [all modified files from this phase]
+  // Configure mock behavior
+  when(mockService.method()).thenReturn(expectedData)
+
+  // Execute and verify
+  component.execute()
+  verify(mockService.method()).calledOnce()
 ```
 
-**B. Create Commit**
-```bash
-git commit -m "Phase N complete: [Phase Name]
-
-- Task 1: [description]
-- Task 2: [description]
-- Task 3: [description]
-
-Quality gates: All passed
-Risk level: [Low/Medium/High/Critical]
-"
-```
-
-**C. Confirm with User**
-Show commit message and ask: "Commit these changes? (Y/n)"
-- If Y: Execute commit
-- If n: Leave changes staged but uncommitted
-
-**D. Optional Tagging**
-Ask: "Create git tag for this phase? (Y/n)"
-- If Y: Create tag `phase-N-complete`
-
-### Step 7: Inter-Phase Approval
-Before starting next phase:
-
-**A. Show Progress**
-```markdown
-## Implementation Progress
-
-✅ Phase 1: Database Schema (2.1 hours) - Complete
-✅ Phase 2: Entity Models (1.5 hours) - Complete
-⏳ Phase 3: Repository Layer (3 hours) - Next
-⏳ Phase 4: BLoC State Management (2 hours)
-⏳ Phase 5: UI Components (4 hours)
-
-Overall: 40% complete (2 of 5 phases)
-```
-
-**B. Ask for Continuation**
-"Continue to Phase 3: Repository Layer? (Y/n/pause)"
-- Y: Proceed to next phase
-- n: Stop implementation, save progress
-- pause: Save progress, allow resume later
-
-### Step 8: Change Tracking
-Maintain session-level tracking of all changes:
-
-```markdown
-## Session Change Log
-
-### Phase 1
-- Created: 3 files
-- Modified: 1 file
-- Deleted: 0 files
-- Risk: High (database migration)
-
-### Phase 2
-- Created: 3 files
-- Modified: 2 files
-- Deleted: 0 files
-- Risk: Low (entity classes)
-
-### Total Session Impact
-- Files created: 6
-- Files modified: 3
-- Files deleted: 0
-- Highest risk level: High
-- Git commits: 2
-```
-
-## Dry-Run Mode
-
-### Activation
-- Automatically offer before starting: "Preview changes in dry-run mode? (Y/n)"
-- Can be explicitly requested: "Run dry-run first"
-
-### Behavior
-1. **Analyze without executing**: Read plan tasks, determine what would change
-2. **File preview**:
-   ```
-   Would create:
-   - lib/domain/entities/partner.dart (~150 lines)
-   - lib/data/models/partner_model.dart (~200 lines)
-
-   Would modify:
-   - lib/injection.dart (add 15 lines)
-   - lib/core/database/app_database.dart (add 50 lines)
-
-   Would delete:
-   - None
-   ```
-
-3. **Risk preview**: Show estimated risk level
-4. **No actual changes**: No files modified, no git operations
-5. **After preview**: "Proceed with actual implementation? (Y/n)"
-
-## Destructive Operation Warnings
-
-### File Deletion
-Before deleting any file:
-```
-⚠️  DESTRUCTIVE OPERATION WARNING
-
-About to DELETE: lib/old/deprecated_service.dart
-
-This operation:
-- Is IRREVERSIBLE (file will be permanently removed)
-- May break code that imports this file
-- Cannot be undone by quality gates
-
-Recommendation: Verify no active imports before proceeding
-
-Type 'DELETE' to confirm, or 'n' to skip: _
-```
-
-Require typing "DELETE" (case-sensitive) for confirmation.
-
-### Breaking API Changes
-Before modifying public APIs:
-```
-⚠️  BREAKING CHANGE WARNING
-
-About to modify: lib/core/api/auth_service.dart
-Change: Remove method signInWithEmail()
-
-This change:
-- BREAKS existing code using this method
-- Requires updates in dependent files
-- May cause runtime errors if not fully migrated
-
-Impact analysis: Found 7 usages in codebase
-
-Continue? (Y/n): _
-```
-
-### Database Destructive Operations
-```
-🔴 CRITICAL OPERATION WARNING
-
-About to execute: DROP TABLE users
-
-This operation:
-- Permanently DELETES user data
-- Cannot be recovered without backup
-- Will break app if data still needed
-
-DANGER LEVEL: CRITICAL
-
-Type 'I UNDERSTAND THE RISK' to proceed: _
-```
-
-### Security-Related Changes
-```
-⚠️  SECURITY CHANGE WARNING
-
-About to modify: lib/core/auth/token_manager.dart
-Change: Authentication logic modification
-
-This change affects:
-- User authentication flow
-- Security token handling
-- Session management
-
-Recommendation: Extra thorough testing required
-
-Continue? (Y/n): _
-```
-
-## Change Tracking System
-
-### Per-Phase Tracking
-Track for each phase:
-- Files created (list with line counts)
-- Files modified (list with change descriptions)
-- Files deleted (list)
-- Risk classifications
-- Time spent
-- Quality gate results
-
-### Session Aggregation
-Aggregate across all phases in current session:
-- Total files affected
-- Cumulative risk assessment
-- Total commits made
-- Overall progress percentage
-
-### Plan Document Updates
-After each phase, append to Notes section:
-```markdown
-### Phase N Implementation Notes (YYYY-MM-DD HH:MM)
-- Created 3 new entity files
-- Modified database schema (migration #005)
-- All quality gates passed on first attempt
-- No blockers encountered
-- Time: 2.1 hours (estimated: 2 hours, variance: +6%)
-```
-
-## Git Integration Details
-
-### Commit Strategy
-After each successful phase:
-1. Stage only files modified in this phase
-2. Generate descriptive commit message with:
-   - Phase name and number
-   - Task list
-   - Quality gate status
-   - Risk level
-3. Ask user approval before committing
-4. Execute commit if approved
-
-### Commit Message Template
-```
-Phase N complete: [Phase Name]
-
-Tasks completed:
-- Task N.1: [description]
-- Task N.2: [description]
-- Task N.3: [description]
-
-Quality gates: All passed
-Risk level: [Low/Medium/High/Critical]
-Files changed: X created, Y modified, Z deleted
-
-[Optional: Additional context]
-```
-
-### Branch Management
-- Work on current branch (don't create/switch)
-- Suggest creating feature branch if on main/master
-- Tag each phase completion (optional)
-
-### No Auto-Push
-- Never automatically push to remote
-- Leave that decision to user
-- Can suggest pushing after major milestones
-
-## Quality Gate Failure Protocol
-
-### Attempt Tracking
-Track failures per quality gate check:
-- Attempt 1: Show error, auto-suggest retry
-- Attempt 2: Show error, ask if user wants to retry
-- Attempt 3: Show error + analysis + options
-
-### Problem Analysis (After 3rd Failure)
-Analyze and brief user on potential issues:
-
-**For Build Failures**:
-- Missing dependencies in pubspec.yaml
-- Syntax errors in generated code
-- Import path issues
-- Platform-specific build problems
-
-**For Test Failures**:
-- New code not covered by tests
-- Breaking changes affecting test assertions
-- Mock/stub issues
-- Async timing problems
-
-**For Linting Failures**:
-- Code style violations
-- Unused imports
-- Naming convention violations
-- Documentation missing
-
-**For Type Errors**:
-- Null safety violations
-- Type mismatches
-- Missing type annotations
-- Generic type issues
-
-### User Options After 3 Failures
-1. **Continue anyway** (skip quality gate) - Mark as ⚠️ in plan
-2. **Pause implementation** - Save progress, let user fix manually
-3. **Abort phase** - Mark phase as blocked, stop
-4. **Get detailed analysis** - Show full error context with suggestions
-
-## Resume Capability
-
-### Detecting Current State
-When starting:
-1. Read plan document
-2. Find first phase with unchecked tasks or ⏳ Pending status
-3. Show: "Detected incomplete Phase N. Resume from here? (Y/n)"
-4. If previous phase has unchecked tasks: "Phase N-1 incomplete. Resume there? (Y/n)"
-
-### Mid-Phase Resume
-If phase has some checked tasks:
-- Show completed tasks
-- Show remaining tasks
-- Ask: "Resume Phase N from Task N.X? (Y/n)"
-- Continue from that point
+### Test Documentation in Plan
+
+**In each phase, specify**:
+1. **Test File Location**: Exact path where tests will be written
+2. **Test Scenarios**: List of specific test cases
+3. **Expected Failures**: What error should tests show initially?
+4. **Coverage Target**: Percentage for this phase
+5. **Dependencies to Mock**: What needs mocking/stubbing?
+6. **Test Data**: What fixtures/factories are needed?
 
 ## Supporting Files Reference
-- [change-summary-template.md](change-summary-template.md) - Template for change briefings
+- [plan-template.md](plan-template.md) - Complete plan document template
